@@ -12,12 +12,12 @@ module.exports = class MoodStateApp extends Homey.App {
 
     const cardMoodIsActive = this.homey.flow.getConditionCard('mood-is-active');
 
-    cardMoodIsActive.registerArgumentAutocompleteListener("mood", async (query, args) => {
+    cardMoodIsActive.registerArgumentAutocompleteListener('mood', async (query, args) => {
       const moods = await api.moods.getMoods();
       const zones = await api.zones.getZones();
       return Object.values(moods)
-        .filter(mood => mood.name.toLowerCase().includes(query.toLowerCase()))
-        .map(mood => {
+        .filter((mood) => mood.name.toLowerCase().includes(query.toLowerCase()))
+        .map((mood) => {
           return {
             name: mood.name,
             description: zones[mood.zone]?.name,
@@ -36,7 +36,7 @@ module.exports = class MoodStateApp extends Homey.App {
       await Promise.all(
         deviceEntries.map(async ([deviceId]) => {
           devicesById[deviceId] = await api.devices.getDevice({ id: deviceId });
-        })
+        }),
       );
       for (const [deviceId, moodData] of deviceEntries) {
         const device = devicesById[deviceId];
@@ -65,13 +65,12 @@ module.exports = class MoodStateApp extends Homey.App {
             continue;
           }
           const deviceValue = cap.value;
-          if (typeof moodValue === 'number'){
+          if (typeof moodValue === 'number') {
             // Slight relaxation for float comparisons
             if (Math.abs(deviceValue - moodValue) > 0.01) {
               return false;
             }
-          }
-          else if (deviceValue !== moodValue) {
+          } else if (deviceValue !== moodValue) {
             return false;
           }
         }
