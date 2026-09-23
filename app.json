@@ -63,7 +63,8 @@
               "no": "Mood"
             },
             "placeholder": {
-              "en": "mood"
+              "en": "mood",
+              "no": "mood"
             }
           }
         ],
