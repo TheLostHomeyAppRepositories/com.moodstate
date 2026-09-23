@@ -35,19 +35,20 @@ module.exports = class MoodStateApp extends Homey.App {
       const devicesById = {};
       await Promise.all(
         deviceEntries.map(async ([deviceId]) => {
-          devicesById[deviceId] = await api.devices.getDevice({ id: deviceId });
+          devicesById[deviceId] = await api.devices.getDevice({ id: deviceId }).catch(() => null);
         }),
       );
       for (const [deviceId, moodData] of deviceEntries) {
         const device = devicesById[deviceId];
+        const moodState = moodData?.state ?? {};
         // Device not found
         if (!device) return false;
         // Device is offline
         if (!device.available) return false;
 
         // If onoff capability is set to false in the mood, only compare the onoff capability and ignore the rest
-        if (Object.prototype.hasOwnProperty.call(moodData.state, 'onoff')) {
-          const moodOnoff = moodData.state.onoff;
+        if (Object.prototype.hasOwnProperty.call(moodState, 'onoff')) {
+          const moodOnoff = moodState.onoff;
           const deviceOnoffCap = device.capabilitiesObj?.['onoff'];
           if (deviceOnoffCap) {
             const deviceOnoffValue = deviceOnoffCap.value;
@@ -58,7 +59,7 @@ module.exports = class MoodStateApp extends Homey.App {
           }
         }
 
-        for (const [capabilityId, moodValue] of Object.entries(moodData.state)) {
+        for (const [capabilityId, moodValue] of Object.entries(moodState)) {
           const cap = device.capabilitiesObj?.[capabilityId];
           if (!cap) {
             // Capability not found on device
@@ -66,6 +67,10 @@ module.exports = class MoodStateApp extends Homey.App {
           }
           const deviceValue = cap.value;
           if (typeof moodValue === 'number') {
+            // Unknown device value can't be considered a match
+            if (typeof deviceValue !== 'number') {
+              return false;
+            }
             // Slight relaxation for float comparisons
             if (Math.abs(deviceValue - moodValue) > 0.01) {
               return false;
