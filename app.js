@@ -3,6 +3,11 @@
 const Homey = require('homey');
 const { HomeyAPI } = require('homey-api');
 
+const LIGHT_MODE_IGNORED_CAPABILITIES = {
+  temperature: ['light_hue', 'light_saturation'],
+  color: ['light_temperature'],
+};
+
 module.exports = class MoodStateApp extends Homey.App {
 
   async onInit() {
@@ -59,7 +64,13 @@ module.exports = class MoodStateApp extends Homey.App {
           }
         }
 
+        // Drivers may keep stale values for the inactive light mode, so only compare the ones for the mood's mode
+        const ignoredCapabilities = LIGHT_MODE_IGNORED_CAPABILITIES[moodState.light_mode] ?? [];
+
         for (const [capabilityId, moodValue] of Object.entries(moodState)) {
+          if (ignoredCapabilities.includes(capabilityId)) {
+            continue;
+          }
           const cap = device.capabilitiesObj?.[capabilityId];
           if (!cap) {
             // Capability not found on device
