@@ -22,5 +22,8 @@
   },
   "1.0.2": {
     "en": "Better matching against color lights (off ignores other values)."
+  },
+  "1.0.3": {
+    "en": "Improved reliability: handles removed devices and ignores inactive color/temperature values on lights."
   }
 }
