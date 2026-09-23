@@ -91,7 +91,6 @@ module.exports = class MoodStateApp extends Homey.App {
           }
         }
       }
-      this.log(`Mood ${mood.id} is active`);
       return true;
     });
   }
